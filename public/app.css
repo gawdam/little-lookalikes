@@ -117,13 +117,13 @@ h1 span { color: var(--orange); }
 .round-card .round-progress { margin-top: 15px; }
 .scores-screen { padding: 27px 30px 24px; }
 .scores-screen > .eyebrow { justify-content: flex-start; }
-.answer-reveal { margin: 19px 0 21px; padding: 15px; display: flex; align-items: center; gap: 20px; border-radius: 9px; background: #f8f2eb; }
-.photo-match { display: flex; flex: 0 0 auto; align-items: center; gap: 9px; }
-.photo-match figure { width: 86px; margin: 0; text-align: center; }
-.photo-match img { width: 86px; height: 86px; display: block; border: 1px solid #e7ded3; border-radius: 8px; object-fit: cover; background: #fff; }
+.answer-reveal { margin: 19px 0 21px; padding: 15px; display: flex; align-items: center; flex-direction: column; gap: 13px; border-radius: 9px; background: #f8f2eb; }
+.photo-match { display: flex; flex: 0 0 auto; align-items: center; gap: 14px; }
+.photo-match figure { width: 172px; margin: 0; text-align: center; }
+.photo-match img { width: 172px; height: 172px; display: block; border: 1px solid #e7ded3; border-radius: 8px; object-fit: cover; background: #fff; }
 .photo-match figcaption { margin-top: 5px; color: #8c8175; font-size: 10px; font-weight: 600; }
-.match-arrow { color: var(--orange); font-size: 21px; }
-.answer-copy { min-width: 0; display: flex; flex-direction: column; gap: 5px; }
+.match-arrow { color: var(--orange); font-size: 27px; }
+.answer-copy { min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 5px; text-align: center; }
 .answer-reveal strong { font-family: Fraunces, Georgia, serif; font-size: 22px; }
 .answer-reveal small { color: var(--muted); font-size: 11px; }
 .score-heading { padding-bottom: 9px; border-bottom: 1px solid #f0ebe5; }
@@ -221,11 +221,10 @@ h1 span { color: var(--orange); }
   .join-link { grid-column: 1 / -1; }
   .lobby-screen, .scores-screen { padding-right: 19px; padding-left: 19px; }
   .scores-screen .score-note { margin-right: -19px; margin-left: -19px; }
-  .answer-reveal { align-items: flex-start; flex-direction: column; gap: 11px; }
-  .photo-match figure, .photo-match img { width: 72px; }
-  .photo-match img { height: 72px; }
-  .photo-match { gap: 8px; }
-  .match-arrow { font-size: 18px; }
+  .photo-match figure, .photo-match img { width: min(144px, calc((100vw - 96px) / 2)); }
+  .photo-match img { height: min(144px, calc((100vw - 96px) / 2)); }
+  .photo-match { gap: 10px; }
+  .match-arrow { font-size: 22px; }
 }
 
 @media (max-width: 400px) {
