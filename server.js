@@ -91,6 +91,11 @@ function publicGame(view, playerId) {
             .filter((answer) => answer.correct)
             .map((answer) => game.players.find((player) => player.id === answer.playerId)?.name)
             .filter(Boolean),
+          scores: game.players.map((player) => ({
+            id: player.id,
+            name: player.name,
+            points: game.answers[round]?.[player.id]?.correct ? 5 : 0,
+          })),
         }
       : null,
     results: game.status === "completed"

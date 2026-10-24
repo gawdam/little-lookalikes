@@ -245,7 +245,7 @@ function renderQuizmaster(game) {
     document.querySelector("#answer-guesses").textContent = game.roundResult.correctPlayers.length
       ? `Guessed correctly by ${game.roundResult.correctPlayers.join(", ")}`
       : "No correct guesses this round";
-    renderScores(game.players);
+    renderRoundScores(game.roundResult.scores);
     document.querySelector("#next-round").innerHTML = game.roundIndex + 1 === game.totalRounds
       ? 'See final results <span aria-hidden="true">→</span>'
       : 'Next baby <span aria-hidden="true">→</span>';
@@ -263,6 +263,20 @@ function renderScores(players, listId = "score-list") {
   list.innerHTML = [...players].sort((a, b) => b.score - a.score).map((player) =>
     `<div class="score-row"><span class="score-name"><span class="score-avatar">${escapeHtml(player.name.slice(0, 1).toUpperCase())}</span>${escapeHtml(player.name)}</span><span class="score-points">${player.score} pts</span></div>`,
   ).join("");
+}
+
+function renderRoundScores(players) {
+  const list = document.querySelector("#score-list");
+  if (!players.length) {
+    list.innerHTML = '<p class="score-empty">No players joined this game.</p>';
+    return;
+  }
+  list.innerHTML = [...players]
+    .sort((a, b) => b.points - a.points || a.name.localeCompare(b.name))
+    .map((player) =>
+      `<div class="score-row"><span class="score-name"><span class="score-avatar">${escapeHtml(player.name.slice(0, 1).toUpperCase())}</span>${escapeHtml(player.name)}</span><span class="score-points">${player.points} pts</span></div>`,
+    )
+    .join("");
 }
 
 function renderLobbyPlayers(players) {
@@ -386,14 +400,14 @@ function renderPlayer(game) {
       selectedRound = game.roundIndex;
       renderAdultOptions(game, answered);
     }
-    if (answered) showAnswerFeedback(answered, player.score);
+    if (answered) showAnswerFeedback(answered);
   }
   if (game.status === "scores") {
     document.querySelector("#phone-round-feedback").textContent = game.playerAnswer
       ? game.playerAnswer.correct
-        ? `Correct! You earned 5 points and now have ${player.score} total.`
-        : "Not quite this time. Your guess has been counted."
-      : "Time ran out before you made a guess this round.";
+        ? "Correct! You earned 5 points this round."
+        : "Not quite this time. You earned 0 points this round."
+      : "Time ran out. You earned 0 points this round.";
   }
   if (game.status === "completed") {
     document.querySelector("#phone-final-score").textContent = `${player.score} points`;
@@ -421,7 +435,7 @@ async function submitAnswer(participantId, button) {
       method: "POST",
       body: JSON.stringify({ participantId, playerId }),
     });
-    showAnswerFeedback(result, result.game.players.find((player) => player.id === playerId)?.score || 0);
+    showAnswerFeedback(result);
   } catch (error) {
     options.querySelectorAll("button").forEach((option) => { option.disabled = false; });
     showError(document.querySelector("#answer-feedback"), error.message);
@@ -429,12 +443,12 @@ async function submitAnswer(participantId, button) {
   }
 }
 
-function showAnswerFeedback(answer, totalScore) {
+function showAnswerFeedback(answer) {
   const feedback = document.querySelector("#answer-feedback");
   feedback.hidden = false;
   feedback.classList.toggle("wrong", !answer.correct);
   feedback.textContent = answer.correct
-    ? `That’s a match! +5 points · ${totalScore} total`
+    ? "That’s a match! +5 points this round."
     : "Not this time! Your answer is in — watch the big screen.";
   document.querySelectorAll(".adult-option").forEach((option) => { option.disabled = true; });
 }
