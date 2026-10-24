@@ -40,6 +40,17 @@
             <span class="participant-count" id="participant-count">0 people</span>
           </div>
           <form id="create-form">
+            <fieldset class="duration-picker">
+              <legend>Round timer</legend>
+              <label class="duration-option">
+                <input type="radio" name="round-duration" value="20" checked>
+                <span><strong>20 seconds</strong><small>Quick rounds</small></span>
+              </label>
+              <label class="duration-option">
+                <input type="radio" name="round-duration" value="30">
+                <span><strong>30 seconds</strong><small>More thinking time</small></span>
+              </label>
+            </fieldset>
             <div id="participant-list" class="participant-list"></div>
             <div class="builder-actions">
               <button id="add-participant" class="button button-secondary" type="button"><span aria-hidden="true">＋</span> Add a person</button>

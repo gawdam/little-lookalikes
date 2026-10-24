@@ -140,7 +140,13 @@ document.querySelector("#create-form")?.addEventListener("submit", async (event)
         adultImage: await readFileAsDataUrl(adultFile),
       };
     }));
-    await requestJson("/api/game", { method: "POST", body: JSON.stringify({ participants }) });
+    const durationSeconds = Number(
+      event.currentTarget.querySelector('input[name="round-duration"]:checked').value,
+    );
+    await requestJson("/api/game", {
+      method: "POST",
+      body: JSON.stringify({ participants, durationSeconds }),
+    });
     await openGame();
     showSection("play");
   } catch (error) {

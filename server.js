@@ -78,6 +78,7 @@ function publicGame(view, playerId) {
     roundIndex: game.roundIndex,
     roundNumber: round === null ? null : round + 1,
     totalRounds: game.participants.length,
+    durationSeconds: game.durationSeconds,
     endsAt: game.endsAt,
     answeredCount: round === null ? 0 : Object.keys(game.answers[round] || {}).length,
     playerAnswer: playerId && round !== null
@@ -200,6 +201,11 @@ const server = http.createServer(async (request, response) => {
         json(response, 400, { error: "Add at least two participants." });
         return;
       }
+      const durationSeconds = Number(body.durationSeconds ?? 20);
+      if (![20, 30].includes(durationSeconds)) {
+        json(response, 400, { error: "Round duration must be 20 or 30 seconds." });
+        return;
+      }
       const participants = body.participants.map((participant) => ({
         id: crypto.randomUUID(),
         name: String(participant.name || "").trim(),
@@ -216,6 +222,7 @@ const server = http.createServer(async (request, response) => {
       }
       game = {
         status: "lobby",
+        durationSeconds,
         participants,
         players: [],
         roundIndex: -1,
@@ -274,7 +281,7 @@ const server = http.createServer(async (request, response) => {
     }
     game.status = "playing";
     game.roundIndex = 0;
-    game.endsAt = Date.now() + 20_000;
+    game.endsAt = Date.now() + game.durationSeconds * 1000;
     game.answers[0] = {};
     sendUpdate();
     json(response, 200, { game: publicGame("quizmaster") });
@@ -292,7 +299,7 @@ const server = http.createServer(async (request, response) => {
     } else {
       game.roundIndex += 1;
       game.status = "playing";
-      game.endsAt = Date.now() + 20_000;
+      game.endsAt = Date.now() + game.durationSeconds * 1000;
       game.answers[game.roundIndex] = {};
     }
     sendUpdate();

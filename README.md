@@ -12,7 +12,7 @@ A baby-photo matching game with a quizmaster screen and live phone participation
 6. Ask players to join the same Wi-Fi network and scan the QR code. If the QR code does not work, open the displayed join link on their phones.
 7. Start the game when everyone has joined.
 
-The quizmaster first shows the QR code and player list. After starting, each baby photo is shown for a 20-second round, followed by a separate answer-reveal screen showing the baby and adult photos side by side and only the points earned by each player in that round. The quizmaster advances to each next round and can view the cumulative final leaderboard after the last one. Players choose the matching grown-up photo on their phones. Each correct answer earns 5 points.
+The quizmaster chooses a 20- or 30-second timer when creating the game, then first shows the QR code and player list. After starting, each baby photo is shown for the selected duration, followed by a separate answer-reveal screen showing the baby and adult photos side by side and only the points earned by each player in that round. The quizmaster advances to each next round and can view the cumulative final leaderboard after the last one. Players choose the matching grown-up photo on their phones. Each correct answer earns 5 points.
 
 Keep the quizmaster's browser tab open throughout the game. Photos and game state are held in the running server's memory and are cleared when the server stops or a new game is created.
 

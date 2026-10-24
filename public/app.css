@@ -43,6 +43,14 @@ h1 span { color: var(--orange); }
 .builder-heading h2, .card h2 { margin: 0 0 6px; font-family: Fraunces, Georgia, serif; font-size: 24px; letter-spacing: -.5px; }
 .builder-heading p { margin: 0; color: var(--muted); font-size: 13px; }
 .participant-count { margin-bottom: 4px; color: var(--muted); font-size: 12px; }
+.duration-picker { margin: 0 0 18px; padding: 15px; display: flex; flex-wrap: wrap; gap: 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--white); }
+.duration-picker legend { padding: 0 5px; color: #645d54; font-size: 12px; font-weight: 700; }
+.duration-option { min-width: 145px; flex: 1; display: flex; align-items: center; gap: 9px; padding: 11px 12px; border: 1px solid #e7e0d7; border-radius: 8px; cursor: pointer; }
+.duration-option:has(input:checked) { border-color: #dc977c; background: #fff8f3; box-shadow: 0 0 0 2px rgb(223 112 76 / 9%); }
+.duration-option input { width: 15px; height: 15px; margin: 0; accent-color: var(--orange); }
+.duration-option span { display: flex; flex-direction: column; gap: 3px; }
+.duration-option strong { color: var(--ink); font-size: 12px; }
+.duration-option small { color: var(--muted); font-size: 10px; }
 .participant-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 15px; }
 .participant-card { min-width: 0; padding: 18px; border: 1px solid var(--line); border-radius: 11px; background: var(--white); box-shadow: 0 4px 14px rgb(57 45 31 / 2%); }
 .participant-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; }
