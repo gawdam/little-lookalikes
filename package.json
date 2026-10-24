@@ -1,0 +1,12 @@
+{
+  "name": "baby-matching-game",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A local-network baby photo matching game.",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "qrcode": "^1.5.4"
+  }
+}

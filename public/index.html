@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#fbf7f0">
+    <title>Little Lookalikes — Baby Matching Game</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/app.css">
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="/" aria-label="Little Lookalikes home">
+          <span class="brand-icon" aria-hidden="true">✿</span>
+          <span>little <strong>lookalikes</strong></span>
+        </a>
+        <nav class="main-nav" aria-label="Main navigation">
+          <button class="nav-button active" data-section="create">Create game</button>
+          <button class="nav-button" data-section="play">Play game</button>
+        </nav>
+        <span class="topbar-note">a game for good guesses &amp; big laughs</span>
+      </header>
+
+      <main id="quizmaster" class="page">
+        <section id="create-section" class="section">
+          <div class="hero">
+            <div class="eyebrow"><span class="eyebrow-dot"></span> THE FAMILY &amp; FRIENDS GAME</div>
+            <h1>Who grew up to be<br><span>who?</span></h1>
+            <p class="hero-copy">Add the baby photos and their grown-up selves. Then let the guessing begin.</p>
+            <div class="hero-scribble" aria-hidden="true">✳</div>
+          </div>
+          <div class="builder-heading">
+            <div>
+              <h2>Meet the lookalikes</h2>
+              <p>Add at least two people to make a game.</p>
+            </div>
+            <span class="participant-count" id="participant-count">0 people</span>
+          </div>
+          <form id="create-form">
+            <div id="participant-list" class="participant-list"></div>
+            <div class="builder-actions">
+              <button id="add-participant" class="button button-secondary" type="button"><span aria-hidden="true">＋</span> Add a person</button>
+              <button class="button button-primary" type="submit">Create game <span aria-hidden="true">→</span></button>
+            </div>
+            <p id="create-error" class="error-message" role="alert" hidden></p>
+          </form>
+        </section>
+
+        <section id="play-section" class="section" hidden>
+          <div class="play-heading">
+            <div>
+              <div class="eyebrow"><span class="eyebrow-dot"></span> QUIZMASTER SCREEN</div>
+              <h1>Let the <span>guessing</span> begin</h1>
+              <p class="hero-copy">Players scan in, then match each baby photo to a grown-up.</p>
+            </div>
+            <span id="game-status" class="status-pill">No game yet</span>
+          </div>
+          <div id="no-game" class="empty-state">
+            <span class="empty-icon" aria-hidden="true">✿</span>
+            <h2>Your game is waiting to be made</h2>
+            <p>Add your baby and grown-up photos in Create game, then come back here to play.</p>
+            <button class="button button-primary" data-go-create type="button">Create a game <span aria-hidden="true">→</span></button>
+          </div>
+          <div id="game-dashboard" hidden>
+            <div class="game-layout">
+              <section class="round-card card">
+                <div class="round-topline">
+                  <span id="round-label" class="round-label">GET READY</span>
+                  <span id="timer" class="timer"><span class="timer-dot"></span> 00:30</span>
+                </div>
+                <div class="round-photo-wrap">
+                  <img id="baby-photo" class="round-photo" alt="Baby photo to match" hidden>
+                  <div id="photo-placeholder" class="photo-placeholder" aria-hidden="true">?</div>
+                </div>
+                <h2 id="round-title">Ready when you are</h2>
+                <p id="round-hint">The baby photo appears here when the game starts.</p>
+                <button id="start-game" class="button button-primary start-button" type="button">Start game <span aria-hidden="true">→</span></button>
+                <p id="play-error" class="error-message" role="alert" hidden></p>
+                <div id="round-progress" class="round-progress" hidden></div>
+              </section>
+              <aside class="side-column">
+                <section class="join-card card">
+                  <div class="card-title-row">
+                    <div><span class="step-label">LET EVERYONE IN</span><h2>Scan to join</h2></div>
+                    <span class="join-sparkle" aria-hidden="true">✳</span>
+                  </div>
+                  <div class="qr-wrap"><img id="qr-code" alt="QR code to join the game"></div>
+                  <p class="join-instructions">Join this Wi-Fi, scan the code,<br>and pick a name on your phone.</p>
+                  <a id="join-link" class="join-link" href="/play"></a>
+                </section>
+                <section class="score-card card">
+                  <div class="card-title-row">
+                    <div><span class="step-label">THE CLASS</span><h2>Player scores</h2></div>
+                    <span id="player-count" class="player-count">0</span>
+                  </div>
+                  <div id="score-list" class="score-list"><p class="score-empty">Players appear here when they join.</p></div>
+                  <p class="score-note">+5 points for every correct match</p>
+                </section>
+              </aside>
+            </div>
+            <section id="final-results" class="results-card card" hidden></section>
+          </div>
+        </section>
+      </main>
+
+      <main id="player" class="phone-page" hidden>
+        <a class="brand phone-brand" href="/play"><span class="brand-icon" aria-hidden="true">✿</span><span>little <strong>lookalikes</strong></span></a>
+        <div id="phone-join" class="phone-card">
+          <div class="phone-illustration" aria-hidden="true">✿</div>
+          <div class="eyebrow"><span class="eyebrow-dot"></span> YOU’RE INVITED</div>
+          <h1>Ready to play?</h1>
+          <p class="phone-copy">Pick a name for the scoreboard. Get ready to spot the grown-up!</p>
+          <form id="join-form">
+            <label class="field-label" for="player-name">Your name</label>
+            <input id="player-name" name="name" maxlength="32" autocomplete="name" placeholder="e.g. Sam" required>
+            <button class="button button-primary full-button" type="submit">Join the game <span aria-hidden="true">→</span></button>
+            <p id="join-error" class="error-message" role="alert" hidden></p>
+          </form>
+        </div>
+        <div id="phone-waiting" class="phone-card" hidden>
+          <div class="waiting-icon" aria-hidden="true">✦</div>
+          <div class="eyebrow"><span class="eyebrow-dot"></span> YOU’RE IN</div>
+          <h1>Nice to meet you,<br><span id="waiting-name"></span>!</h1>
+          <p class="phone-copy">Keep this page open. The quizmaster will start the game in a moment.</p>
+          <div class="waiting-dots" aria-label="Waiting for the quizmaster"><i></i><i></i><i></i></div>
+        </div>
+        <div id="phone-playing" class="phone-card phone-playing" hidden>
+          <div class="phone-round-bar"><span id="phone-round-label">ROUND 1</span><span id="phone-timer" class="timer"><span class="timer-dot"></span> 00:30</span></div>
+          <div class="eyebrow"><span class="eyebrow-dot"></span> PICK THE GROWN-UP</div>
+          <h1>Who was the<br><span>baby?</span></h1>
+          <p class="phone-copy">Tap the grown-up you think matches the baby on the big screen.</p>
+          <div id="adult-options" class="adult-options"></div>
+          <div id="answer-feedback" class="answer-feedback" role="status" hidden></div>
+        </div>
+        <div id="phone-finished" class="phone-card" hidden>
+          <div class="waiting-icon" aria-hidden="true">✿</div>
+          <div class="eyebrow"><span class="eyebrow-dot"></span> GAME COMPLETE</div>
+          <h1>That’s a <span>wrap!</span></h1>
+          <p class="phone-copy">Thanks for playing. Check the big screen to see how everyone did.</p>
+          <div id="phone-final-score" class="phone-final-score"></div>
+        </div>
+        <p id="phone-no-game" class="phone-no-game" hidden>No game is open right now. Ask the quizmaster to create one.</p>
+        <p class="phone-footer">made for memorable family moments</p>
+      </main>
+    </div>
+    <template id="participant-template">
+      <article class="participant-card">
+        <div class="participant-header"><span class="participant-number"></span><button class="remove-participant" type="button" aria-label="Remove this person">×</button></div>
+        <label class="field-label">Their name<input class="person-name" type="text" maxlength="40" placeholder="e.g. Auntie May" required></label>
+        <div class="photo-fields">
+          <label class="upload-field"><span class="upload-title">Baby photo</span><span class="upload-box"><img class="upload-preview" alt="" hidden><span class="upload-prompt"><b>＋</b><span>Add photo</span></span></span><input class="baby-file" type="file" accept="image/jpeg,image/png,image/webp,image/gif" required><span class="upload-hint">Choose a clear baby photo</span></label>
+          <label class="upload-field"><span class="upload-title">Grown-up photo</span><span class="upload-box"><img class="upload-preview" alt="" hidden><span class="upload-prompt"><b>＋</b><span>Add photo</span></span></span><input class="adult-file" type="file" accept="image/jpeg,image/png,image/webp,image/gif" required><span class="upload-hint">Choose a recent photo</span></label>
+        </div>
+      </article>
+    </template>
+    <script src="/app.js" defer></script>
+  </body>
+</html>
