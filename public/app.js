@@ -241,6 +241,8 @@ function renderQuizmaster(game) {
   } else if (game.status === "scores") {
     const reveal = game.participants[game.roundIndex];
     document.querySelector("#scores-title").textContent = `Round ${game.roundNumber} scores`;
+    document.querySelector("#answer-baby-photo").src = game.roundResult.babyImage;
+    document.querySelector("#answer-adult-photo").src = game.roundResult.adultImage;
     document.querySelector("#answer-name").textContent = reveal.name;
     document.querySelector("#answer-guesses").textContent = game.roundResult.correctPlayers.length
       ? `Guessed correctly by ${game.roundResult.correctPlayers.join(", ")}`

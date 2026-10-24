@@ -86,6 +86,7 @@ function publicGame(view, playerId) {
     roundResult: round !== null && (game.status === "scores" || game.status === "completed")
       ? {
           name: game.participants[round].name,
+          ...(!playerView ? { babyImage: game.participants[round].babyImage } : {}),
           adultImage: game.participants[round].adultImage,
           correctPlayers: Object.values(game.answers[round] || {})
             .filter((answer) => answer.correct)
