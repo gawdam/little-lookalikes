@@ -9,6 +9,7 @@ const participantCount = document.querySelector("#participant-count");
 const createError = document.querySelector("#create-error");
 const joinError = document.querySelector("#join-error");
 const playerIdKey = "little-lookalikes-player-id";
+const backendSetupMessage = "The game server is not connected yet. Deploy the Render service and set the GAME_API_URL GitHub Actions variable, then rerun the Pages deployment.";
 let currentGame = null;
 let eventSource = null;
 let timerInterval = null;
@@ -106,6 +107,7 @@ function readFileAsDataUrl(file) {
 }
 
 async function requestJson(url, options = {}) {
+  if (!apiBaseUrl) throw new Error(backendSetupMessage);
   const response = await fetch(`${apiBaseUrl}${url}`, {
     ...options,
     headers: { "Content-Type": "application/json", ...options.headers },
@@ -441,7 +443,8 @@ if (isPlayerPage) {
   startPlayerPage().catch((error) => {
     document.querySelector("#phone-join").hidden = true;
     document.querySelector("#phone-no-game").hidden = false;
-    console.error("Could not load the game:", error);
+    document.querySelector("#phone-no-game").textContent = error.message;
+    if (apiBaseUrl) console.error("Could not load the game:", error);
   });
 }
 
@@ -452,9 +455,17 @@ if (!isPlayerPage) {
     if (game) {
       openGame()
         .then(() => showSection("play"))
-        .catch((error) => console.error("Could not connect to the game:", error));
+        .catch((error) => {
+          document.querySelector("#game-status").textContent = "Server unavailable";
+          document.querySelector("#no-game-message").textContent = error.message;
+          if (apiBaseUrl) console.error("Could not connect to the game:", error);
+        });
     }
-  }).catch((error) => console.error("Could not load the game:", error));
+  }).catch((error) => {
+    document.querySelector("#game-status").textContent = "Server unavailable";
+    document.querySelector("#no-game-message").textContent = error.message;
+    if (apiBaseUrl) console.error("Could not load the game:", error);
+  });
 }
 
 timerInterval = window.setInterval(() => {

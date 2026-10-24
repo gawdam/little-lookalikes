@@ -18,7 +18,7 @@ Keep the quizmaster's browser tab open throughout the game. Photos and game stat
 
 ## Publish with GitHub Pages and Render
 
-GitHub Pages serves the static game interface. The Node server must run separately to handle live game state, photos, timers, and scores. This repository includes a Render Blueprint and a GitHub Actions Pages workflow.
+GitHub Pages serves the static game interface. The Node server must run separately to handle live game state, photos, timers, and scores. This repository includes a Render Blueprint and a GitHub Actions Pages workflow. The Pages interface can be deployed before the backend is configured, but multiplayer will show a setup message until the backend URL is set.
 
 1. Push this repository to the `main` branch on GitHub.
 2. In Render, create a new **Blueprint** from this repository and deploy `render.yaml`. This creates the `little-lookalikes-api` web service.
