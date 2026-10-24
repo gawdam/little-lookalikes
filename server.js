@@ -8,6 +8,7 @@ const QRCode = require("qrcode");
 const PORT = Number(process.env.PORT || 3000);
 const PUBLIC_DIR = path.join(__dirname, "public");
 const MAX_BODY_SIZE = 64 * 1024 * 1024;
+const CORS_ORIGIN = process.env.CORS_ORIGIN;
 let game = null;
 const clients = new Set();
 
@@ -26,6 +27,12 @@ function json(response, statusCode, body) {
   response.writeHead(statusCode, {
     "Content-Type": "application/json; charset=utf-8",
     "Cache-Control": "no-store",
+    ...(CORS_ORIGIN ? {
+      "Access-Control-Allow-Origin": CORS_ORIGIN,
+      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type",
+      Vary: "Origin",
+    } : {}),
   });
   response.end(JSON.stringify(body));
 }
@@ -139,15 +146,23 @@ const server = http.createServer(async (request, response) => {
   const view = url.searchParams.get("view") === "player" ? "player" : "quizmaster";
   const playerId = url.searchParams.get("playerId");
 
+  if (request.method === "OPTIONS" && url.pathname.startsWith("/api/")) {
+    json(response, 204, {});
+    return;
+  }
+
   if (request.method === "GET" && url.pathname === "/api/state") {
     json(response, 200, { game: publicGame(view, playerId) });
     return;
   }
 
   if (request.method === "GET" && url.pathname === "/api/join-url") {
-    const joinUrl = `http://${getLanAddress()}:${PORT}/play`;
+    const joinUrl = process.env.PLAYER_URL || `http://${getLanAddress()}:${PORT}/play`;
     try {
-      json(response, 200, { url: joinUrl, qr: await QRCode.toDataURL(joinUrl, { margin: 1, width: 280 }) });
+      const playerUrl = new URL(joinUrl);
+      playerUrl.searchParams.set("view", "player");
+      const finalJoinUrl = playerUrl.toString();
+      json(response, 200, { url: finalJoinUrl, qr: await QRCode.toDataURL(finalJoinUrl, { margin: 1, width: 280 }) });
     } catch (error) {
       json(response, 500, { error: `Could not create QR code: ${error.message}` });
     }
@@ -159,6 +174,10 @@ const server = http.createServer(async (request, response) => {
       "Content-Type": "text/event-stream",
       "Cache-Control": "no-cache",
       Connection: "keep-alive",
+      ...(CORS_ORIGIN ? {
+        "Access-Control-Allow-Origin": CORS_ORIGIN,
+        Vary: "Origin",
+      } : {}),
     });
     response.view = view;
     response.playerId = playerId;
@@ -320,6 +339,10 @@ const server = http.createServer(async (request, response) => {
     serveFile(response, "app.js", "text/javascript; charset=utf-8");
     return;
   }
+  if (request.method === "GET" && url.pathname === "/config.js") {
+    serveFile(response, "config.js", "text/javascript; charset=utf-8");
+    return;
+  }
   if (request.method === "GET" && url.pathname === "/play") {
     serveFile(response, "index.html", "text/html; charset=utf-8");
     return;
@@ -329,5 +352,5 @@ const server = http.createServer(async (request, response) => {
 
 server.listen(PORT, "0.0.0.0", () => {
   console.log(`Baby Matching Game is running at http://localhost:${PORT}`);
-  console.log(`Phone join link: http://${getLanAddress()}:${PORT}/play`);
+  console.log(`Phone join link: ${process.env.PLAYER_URL || `http://${getLanAddress()}:${PORT}/play`}`);
 });

@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: little-lookalikes-api
+    runtime: node
+    plan: free
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /api/state
+    envVars:
+      - key: CORS_ORIGIN
+        value: https://gawdam.github.io
+      - key: PLAYER_URL
+        value: https://gawdam.github.io/little-lookalikes/

@@ -4,7 +4,8 @@
   "private": true,
   "description": "A local-network baby photo matching game.",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "build:pages": "node scripts/build-pages.js"
   },
   "dependencies": {
     "qrcode": "^1.5.4"

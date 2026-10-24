@@ -1,6 +1,8 @@
 const quizmaster = document.querySelector("#quizmaster");
 const playerPage = document.querySelector("#player");
-const isPlayerPage = window.location.pathname === "/play";
+const isPlayerPage = window.location.pathname.endsWith("/play")
+  || new URLSearchParams(window.location.search).get("view") === "player";
+const apiBaseUrl = window.GAME_CONFIG?.apiUrl?.replace(/\/+$/, "") || "";
 const participantsElement = document.querySelector("#participant-list");
 const participantTemplate = document.querySelector("#participant-template");
 const participantCount = document.querySelector("#participant-count");
@@ -104,7 +106,7 @@ function readFileAsDataUrl(file) {
 }
 
 async function requestJson(url, options = {}) {
-  const response = await fetch(url, {
+  const response = await fetch(`${apiBaseUrl}${url}`, {
     ...options,
     headers: { "Content-Type": "application/json", ...options.headers },
   });
@@ -180,7 +182,7 @@ async function openGame() {
   const state = await requestJson("/api/state");
   renderQuizmaster(state.game);
   if (eventSource) eventSource.close();
-  eventSource = new EventSource("/api/events");
+  eventSource = new EventSource(`${apiBaseUrl}/api/events`);
   eventSource.onmessage = (event) => renderQuizmaster(JSON.parse(event.data));
   eventSource.onerror = () => {
     document.querySelector("#game-status").textContent = "Reconnecting…";
@@ -324,7 +326,7 @@ function connectPlayerEvents() {
   if (eventSource) eventSource.close();
   const playerId = localStorage.getItem(playerIdKey);
   const query = playerId ? `?view=player&playerId=${encodeURIComponent(playerId)}` : "?view=player";
-  eventSource = new EventSource(`/api/events${query}`);
+  eventSource = new EventSource(`${apiBaseUrl}/api/events${query}`);
   eventSource.onmessage = (event) => renderPlayer(JSON.parse(event.data));
 }
 

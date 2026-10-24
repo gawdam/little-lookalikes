@@ -8,12 +8,12 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/app.css">
+    <link rel="stylesheet" href="./app.css">
   </head>
   <body>
     <div class="app-shell">
       <header class="topbar">
-        <a class="brand" href="/" aria-label="Little Lookalikes home">
+        <a class="brand" href="./" aria-label="Little Lookalikes home">
           <span class="brand-icon" aria-hidden="true">✿</span>
           <span>little <strong>lookalikes</strong></span>
         </a>
@@ -70,7 +70,7 @@
               <h2>Let everyone join</h2>
               <p class="screen-copy">Players scan this QR code and enter their name on their phone.</p>
               <div class="qr-wrap"><img id="qr-code" alt="QR code to join the game"></div>
-              <a id="join-link" class="join-link" href="/play"></a>
+              <a id="join-link" class="join-link" href="./?view=player"></a>
               <div class="lobby-players">
                 <div class="card-title-row">
                   <div><span class="step-label">PLAYERS JOINING</span><h2>Ready to play?</h2></div>
@@ -113,7 +113,7 @@
       </main>
 
       <main id="player" class="phone-page" hidden>
-        <a class="brand phone-brand" href="/play"><span class="brand-icon" aria-hidden="true">✿</span><span>little <strong>lookalikes</strong></span></a>
+        <a class="brand phone-brand" href="./?view=player"><span class="brand-icon" aria-hidden="true">✿</span><span>little <strong>lookalikes</strong></span></a>
         <div id="phone-join" class="phone-card">
           <div class="phone-illustration" aria-hidden="true">✿</div>
           <div class="eyebrow"><span class="eyebrow-dot"></span> YOU’RE INVITED</div>
@@ -169,6 +169,7 @@
         </div>
       </article>
     </template>
-    <script src="/app.js" defer></script>
+    <script src="./config.js"></script>
+    <script src="./app.js" defer></script>
   </body>
 </html>
