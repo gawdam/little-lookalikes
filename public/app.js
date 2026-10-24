@@ -167,6 +167,14 @@ document.querySelector("#start-game")?.addEventListener("click", async () => {
     showError(document.querySelector("#play-error"), error.message);
   }
 });
+document.querySelector("#next-round")?.addEventListener("click", async () => {
+  try {
+    await requestJson("/api/next-round", { method: "POST", body: "{}" });
+    showError(document.querySelector("#play-error"), "");
+  } catch (error) {
+    showError(document.querySelector("#play-error"), error.message);
+  }
+});
 
 async function openGame() {
   const state = await requestJson("/api/state");
@@ -195,63 +203,72 @@ function renderQuizmaster(game) {
     status.classList.remove("live");
     return;
   }
-  const statusText = { lobby: "Waiting to start", playing: "Game in progress", completed: "Game complete" }[game.status];
+  const statusText = {
+    lobby: "Waiting to start",
+    playing: "Round in progress",
+    scores: "Round results",
+    completed: "Game complete",
+  }[game.status];
   status.textContent = statusText;
   status.classList.toggle("live", game.status === "playing");
-  document.querySelector("#player-count").textContent = game.players.length;
-  renderScores(game.players);
-  const image = document.querySelector("#baby-photo");
-  const placeholder = document.querySelector("#photo-placeholder");
-  const title = document.querySelector("#round-title");
-  const hint = document.querySelector("#round-hint");
-  const start = document.querySelector("#start-game");
-  const roundProgress = document.querySelector("#round-progress");
+  const lobby = document.querySelector("#lobby-screen");
+  const round = document.querySelector("#round-screen");
+  const scores = document.querySelector("#scores-screen");
   const results = document.querySelector("#final-results");
+  lobby.hidden = game.status !== "lobby";
+  round.hidden = game.status !== "playing";
+  scores.hidden = game.status !== "scores";
   results.hidden = game.status !== "completed";
   if (game.status === "lobby") {
-    document.querySelector("#round-label").textContent = "GET READY";
-    placeholder.hidden = false;
-    image.hidden = true;
-    title.textContent = "Ready when you are";
-    hint.textContent = "Players can scan in and enter their names.";
-    document.querySelector("#timer").innerHTML = '<span class="timer-dot"></span> 00:30';
-    start.hidden = false;
-    roundProgress.hidden = true;
+    document.querySelector("#player-count").textContent = game.players.length;
+    renderLobbyPlayers(game.players);
   } else if (game.status === "playing") {
     const participant = game.participants[game.roundIndex];
     document.querySelector("#round-label").textContent = `ROUND ${game.roundNumber} OF ${game.totalRounds}`;
-    image.src = participant.babyImage;
-    image.hidden = false;
-    placeholder.hidden = true;
-    title.textContent = "Who is this little one?";
-    hint.textContent = `${game.answeredCount} ${game.answeredCount === 1 ? "player has" : "players have"} made a guess`;
-    start.hidden = true;
-    roundProgress.hidden = false;
-    roundProgress.innerHTML = game.participants.map((_, index) =>
+    const babyPhoto = document.querySelector("#baby-photo");
+    babyPhoto.src = participant.babyImage;
+    babyPhoto.hidden = false;
+    document.querySelector("#round-hint").textContent =
+      `${game.answeredCount} ${game.answeredCount === 1 ? "player has" : "players have"} made a guess`;
+    document.querySelector("#round-progress").innerHTML = game.participants.map((_, index) =>
       `<span class="${index < game.roundIndex ? "done" : ""} ${index === game.roundIndex ? "current" : ""}"></span>`,
     ).join("");
     renderTimer(document.querySelector("#timer"), game.endsAt);
+  } else if (game.status === "scores") {
+    const reveal = game.participants[game.roundIndex];
+    document.querySelector("#scores-title").textContent = `Round ${game.roundNumber} scores`;
+    document.querySelector("#answer-name").textContent = reveal.name;
+    document.querySelector("#answer-guesses").textContent = game.roundResult.correctPlayers.length
+      ? `Guessed correctly by ${game.roundResult.correctPlayers.join(", ")}`
+      : "No correct guesses this round";
+    renderScores(game.players);
+    document.querySelector("#next-round").innerHTML = game.roundIndex + 1 === game.totalRounds
+      ? 'See final results <span aria-hidden="true">→</span>'
+      : 'Next baby <span aria-hidden="true">→</span>';
   } else {
-    document.querySelector("#round-label").textContent = "ALL DONE!";
-    placeholder.hidden = true;
-    image.hidden = true;
-    title.textContent = "What a lovely bunch!";
-    hint.textContent = "Here are the final scores and the baby-to-grown-up reveal.";
-    start.hidden = true;
-    roundProgress.hidden = true;
-    document.querySelector("#timer").innerHTML = '<span class="timer-dot"></span> DONE';
     renderResults(game);
   }
 }
 
-function renderScores(players) {
-  const list = document.querySelector("#score-list");
+function renderScores(players, listId = "score-list") {
+  const list = document.getElementById(listId);
   if (!players.length) {
     list.innerHTML = '<p class="score-empty">Players appear here when they join.</p>';
     return;
   }
   list.innerHTML = [...players].sort((a, b) => b.score - a.score).map((player) =>
     `<div class="score-row"><span class="score-name"><span class="score-avatar">${escapeHtml(player.name.slice(0, 1).toUpperCase())}</span>${escapeHtml(player.name)}</span><span class="score-points">${player.score} pts</span></div>`,
+  ).join("");
+}
+
+function renderLobbyPlayers(players) {
+  const list = document.querySelector("#lobby-player-list");
+  if (!players.length) {
+    list.innerHTML = '<p class="score-empty">Players appear here when they join.</p>';
+    return;
+  }
+  list.innerHTML = players.map((player) =>
+    `<div class="score-row"><span class="score-name"><span class="score-avatar">${escapeHtml(player.name.slice(0, 1).toUpperCase())}</span>${escapeHtml(player.name)}</span><span class="joined-label">Joined</span></div>`,
   ).join("");
 }
 
@@ -262,7 +279,7 @@ function renderResults(game) {
   results.innerHTML = `<h2>And the lookalike champion is…</h2><p>${winner ? `${escapeHtml(winner.name)} takes the crown with ${winner.score} points!` : "Thanks for playing!"}</p>${sorted.map((player, index) =>
     `<div class="result-winner"><strong>${index + 1}. ${escapeHtml(player.name)}</strong><span>${player.score} points</span></div>`,
   ).join("")}<h2 style="margin-top:24px">The baby-to-grown-up reveal</h2>${game.results.map((result) =>
-    `<div class="round-results"><img src="${result.babyImage}" alt=""><div>${escapeHtml(result.name)}<small>${result.correctPlayers.length ? `Correctly guessed by ${result.correctPlayers.map(escapeHtml).join(", ")}` : "No correct guesses this round"}</small></div></div>`,
+    `<div class="round-results"><div>${escapeHtml(result.name)}<small>${result.correctPlayers.length ? `Correctly guessed by ${result.correctPlayers.map(escapeHtml).join(", ")}` : "No correct guesses this round"}</small></div></div>`,
   ).join("")}`;
 }
 
@@ -354,6 +371,7 @@ function renderPlayer(game) {
   document.querySelector("#phone-no-game").hidden = true;
   document.querySelector("#phone-waiting").hidden = game.status !== "lobby";
   document.querySelector("#phone-playing").hidden = game.status !== "playing";
+  document.querySelector("#phone-round-scores").hidden = game.status !== "scores";
   document.querySelector("#phone-finished").hidden = game.status !== "completed";
   document.querySelector("#waiting-name").textContent = player.name;
   if (game.status === "playing") {
@@ -365,6 +383,13 @@ function renderPlayer(game) {
       renderAdultOptions(game, answered);
     }
     if (answered) showAnswerFeedback(answered, player.score);
+  }
+  if (game.status === "scores") {
+    document.querySelector("#phone-round-feedback").textContent = game.playerAnswer
+      ? game.playerAnswer.correct
+        ? `Correct! You earned 5 points and now have ${player.score} total.`
+        : "Not quite this time. Your guess has been counted."
+      : "Time ran out before you made a guess this round.";
   }
   if (game.status === "completed") {
     document.querySelector("#phone-final-score").textContent = `${player.score} points`;

@@ -65,42 +65,48 @@
             <button class="button button-primary" data-go-create type="button">Create a game <span aria-hidden="true">→</span></button>
           </div>
           <div id="game-dashboard" hidden>
-            <div class="game-layout">
-              <section class="round-card card">
-                <div class="round-topline">
-                  <span id="round-label" class="round-label">GET READY</span>
-                  <span id="timer" class="timer"><span class="timer-dot"></span> 00:30</span>
+            <section id="lobby-screen" class="lobby-screen card">
+              <div class="eyebrow"><span class="eyebrow-dot"></span> THE GAME IS READY</div>
+              <h2>Let everyone join</h2>
+              <p class="screen-copy">Players scan this QR code and enter their name on their phone.</p>
+              <div class="qr-wrap"><img id="qr-code" alt="QR code to join the game"></div>
+              <a id="join-link" class="join-link" href="/play"></a>
+              <div class="lobby-players">
+                <div class="card-title-row">
+                  <div><span class="step-label">PLAYERS JOINING</span><h2>Ready to play?</h2></div>
+                  <span id="player-count" class="player-count">0</span>
                 </div>
-                <div class="round-photo-wrap">
-                  <img id="baby-photo" class="round-photo" alt="Baby photo to match" hidden>
-                  <div id="photo-placeholder" class="photo-placeholder" aria-hidden="true">?</div>
-                </div>
-                <h2 id="round-title">Ready when you are</h2>
-                <p id="round-hint">The baby photo appears here when the game starts.</p>
-                <button id="start-game" class="button button-primary start-button" type="button">Start game <span aria-hidden="true">→</span></button>
-                <p id="play-error" class="error-message" role="alert" hidden></p>
-                <div id="round-progress" class="round-progress" hidden></div>
-              </section>
-              <aside class="side-column">
-                <section class="join-card card">
-                  <div class="card-title-row">
-                    <div><span class="step-label">LET EVERYONE IN</span><h2>Scan to join</h2></div>
-                    <span class="join-sparkle" aria-hidden="true">✳</span>
-                  </div>
-                  <div class="qr-wrap"><img id="qr-code" alt="QR code to join the game"></div>
-                  <p class="join-instructions">Join this Wi-Fi, scan the code,<br>and pick a name on your phone.</p>
-                  <a id="join-link" class="join-link" href="/play"></a>
-                </section>
-                <section class="score-card card">
-                  <div class="card-title-row">
-                    <div><span class="step-label">THE CLASS</span><h2>Player scores</h2></div>
-                    <span id="player-count" class="player-count">0</span>
-                  </div>
-                  <div id="score-list" class="score-list"><p class="score-empty">Players appear here when they join.</p></div>
-                  <p class="score-note">+5 points for every correct match</p>
-                </section>
-              </aside>
-            </div>
+                <div id="lobby-player-list" class="score-list"><p class="score-empty">Players appear here when they join.</p></div>
+              </div>
+              <button id="start-game" class="button button-primary start-button" type="button">Start game <span aria-hidden="true">→</span></button>
+              <p id="play-error" class="error-message" role="alert" hidden></p>
+            </section>
+            <section id="round-screen" class="round-card card" hidden>
+              <div class="round-topline">
+                <span id="round-label" class="round-label">ROUND 1</span>
+                <span id="timer" class="timer"><span class="timer-dot"></span> 00:20</span>
+              </div>
+              <div class="round-photo-wrap">
+                <img id="baby-photo" class="round-photo" alt="Baby photo to match" hidden>
+              </div>
+              <h2>Who is this little one?</h2>
+              <p id="round-hint">Choose the matching grown-up on your phone.</p>
+              <div id="round-progress" class="round-progress"></div>
+            </section>
+            <section id="scores-screen" class="scores-screen card" hidden>
+              <div class="eyebrow"><span class="eyebrow-dot"></span> ROUND RESULTS</div>
+              <h2 id="scores-title">How did everyone do?</h2>
+              <div class="answer-reveal">
+                <span class="answer-star" aria-hidden="true">✳</span>
+                <div><span class="step-label">THE BABY GREW UP TO BE</span><strong id="answer-name"></strong><small id="answer-guesses"></small></div>
+              </div>
+              <div class="card-title-row score-heading">
+                <div><span class="step-label">SCOREBOARD</span><h2>Player scores</h2></div>
+              </div>
+              <div id="score-list" class="score-list"></div>
+              <p class="score-note">+5 points for every correct match</p>
+              <button id="next-round" class="button button-primary start-button" type="button">Next baby <span aria-hidden="true">→</span></button>
+            </section>
             <section id="final-results" class="results-card card" hidden></section>
           </div>
         </section>
@@ -128,12 +134,19 @@
           <div class="waiting-dots" aria-label="Waiting for the quizmaster"><i></i><i></i><i></i></div>
         </div>
         <div id="phone-playing" class="phone-card phone-playing" hidden>
-          <div class="phone-round-bar"><span id="phone-round-label">ROUND 1</span><span id="phone-timer" class="timer"><span class="timer-dot"></span> 00:30</span></div>
+          <div class="phone-round-bar"><span id="phone-round-label">ROUND 1</span><span id="phone-timer" class="timer"><span class="timer-dot"></span> 00:20</span></div>
           <div class="eyebrow"><span class="eyebrow-dot"></span> PICK THE GROWN-UP</div>
           <h1>Who was the<br><span>baby?</span></h1>
           <p class="phone-copy">Tap the grown-up you think matches the baby on the big screen.</p>
           <div id="adult-options" class="adult-options"></div>
           <div id="answer-feedback" class="answer-feedback" role="status" hidden></div>
+        </div>
+        <div id="phone-round-scores" class="phone-card" hidden>
+          <div class="waiting-icon" aria-hidden="true">✦</div>
+          <div class="eyebrow"><span class="eyebrow-dot"></span> ROUND COMPLETE</div>
+          <h1>How did you <span>do?</span></h1>
+          <p id="phone-round-feedback" class="phone-copy"></p>
+          <p class="phone-copy">Watch the big screen for the scores. The next baby is coming up!</p>
         </div>
         <div id="phone-finished" class="phone-card" hidden>
           <div class="waiting-icon" aria-hidden="true">✿</div>

@@ -98,6 +98,36 @@ h1 span { color: var(--orange); }
 .round-progress span { width: 23px; height: 5px; border-radius: 8px; background: #e9e2d8; }
 .round-progress span.done { background: var(--green); }
 .round-progress span.current { background: var(--orange); }
+.lobby-screen, .scores-screen { width: min(100%, 610px); margin: 0 auto; padding: 30px; }
+.lobby-screen { display: flex; flex-direction: column; align-items: center; text-align: center; }
+.lobby-screen > h2, .scores-screen > h2 { margin: 11px 0 5px; font-family: Fraunces, Georgia, serif; font-size: 28px; }
+.screen-copy { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.6; }
+.lobby-screen .qr-wrap { width: 206px; height: 206px; margin: 19px auto 7px; }
+.lobby-screen .join-link { margin-top: 5px; }
+.lobby-players { width: min(100%, 350px); margin-top: 23px; padding-top: 18px; border-top: 1px solid #f0ebe5; text-align: left; }
+.lobby-players .card-title-row { align-items: center; }
+.lobby-players .card-title-row h2, .score-heading h2 { margin: 0; font-family: Fraunces, Georgia, serif; font-size: 20px; }
+.lobby-players .score-list { margin-top: 6px; }
+.joined-label { color: var(--green); font-size: 10px; font-weight: 600; }
+.lobby-screen .start-button { margin-top: 20px; }
+.round-card { width: min(100%, 670px); min-height: 0; margin: 0 auto; padding: 23px 30px 28px; }
+.round-card .round-photo-wrap { width: min(390px, 100%); height: clamp(300px, 48vw, 430px); margin: 17px auto 18px; }
+.round-card > h2 { margin: 0 0 6px; font-family: Fraunces, Georgia, serif; font-size: 27px; }
+.round-card > p { color: var(--muted); font-size: 12px; }
+.round-card .round-progress { margin-top: 15px; }
+.scores-screen { padding: 27px 30px 24px; }
+.scores-screen > .eyebrow { justify-content: flex-start; }
+.answer-reveal { margin: 19px 0 21px; padding: 15px; display: flex; align-items: center; gap: 15px; border-radius: 9px; background: #f8f2eb; }
+.answer-star { width: 48px; height: 48px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 50%; background: #f3e2d4; color: var(--orange); font-size: 23px; }
+.answer-reveal > div { display: flex; flex-direction: column; gap: 5px; }
+.answer-reveal strong { font-family: Fraunces, Georgia, serif; font-size: 22px; }
+.answer-reveal small { color: var(--muted); font-size: 11px; }
+.score-heading { padding-bottom: 9px; border-bottom: 1px solid #f0ebe5; }
+.scores-screen .score-list { margin: 0; }
+.scores-screen .score-row { padding: 11px 0; }
+.scores-screen .score-note { margin: 10px -30px 0; }
+.scores-screen .start-button { margin-top: 18px; }
+.round-card .round-photo-wrap { flex-shrink: 0; }
 .side-column { display: flex; flex-direction: column; gap: 16px; }
 .join-card, .score-card { padding: 18px 19px; }
 .card-title-row { display: flex; align-items: flex-start; justify-content: space-between; }
@@ -124,7 +154,6 @@ h1 span { color: var(--orange); }
 .result-winner strong { font-size: 14px; }
 .result-winner span { color: var(--green); font-size: 13px; font-weight: 700; }
 .round-results { padding: 11px 0; display: flex; gap: 12px; align-items: center; border-top: 1px solid #f0ebe5; }
-.round-results img { width: 40px; height: 40px; border-radius: 6px; object-fit: cover; }
 .round-results div { font-size: 12px; font-weight: 600; }
 .round-results small { display: block; margin-top: 4px; color: var(--muted); font-size: 10px; font-weight: 400; }
 
@@ -178,15 +207,16 @@ h1 span { color: var(--orange); }
   .play-heading .hero-copy { max-width: 270px; }
   .status-pill { margin-top: 6px; white-space: nowrap; }
   .game-layout { grid-template-columns: 1fr; }
-  .round-card { min-height: 535px; }
-  .round-photo-wrap { width: min(245px, 100%); height: 245px; }
+  .round-card { min-height: 0; }
+  .round-card .round-photo-wrap { width: min(350px, 100%); height: min(350px, 90vw); }
   .side-column { display: grid; grid-template-columns: 1fr; }
   .join-card { display: grid; grid-template-columns: 1fr 130px; align-items: center; }
   .join-card .card-title-row { grid-column: 1 / -1; }
   .qr-wrap { width: 120px; height: 120px; margin: 10px 0 0; }
   .join-instructions { grid-column: 1; grid-row: 2; text-align: left; }
   .join-link { grid-column: 1 / -1; }
-  .score-card { padding-bottom: 18px; }
+  .lobby-screen, .scores-screen { padding-right: 19px; padding-left: 19px; }
+  .scores-screen .score-note { margin-right: -19px; margin-left: -19px; }
 }
 
 @media (max-width: 400px) {

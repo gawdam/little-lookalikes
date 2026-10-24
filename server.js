@@ -76,6 +76,16 @@ function publicGame(view, playerId) {
     playerAnswer: playerId && round !== null
       ? game.answers[round]?.[playerId] || null
       : null,
+    roundResult: round !== null && (game.status === "scores" || game.status === "completed")
+      ? {
+          name: game.participants[round].name,
+          adultImage: game.participants[round].adultImage,
+          correctPlayers: Object.values(game.answers[round] || {})
+            .filter((answer) => answer.correct)
+            .map((answer) => game.players.find((player) => player.id === answer.playerId)?.name)
+            .filter(Boolean),
+        }
+      : null,
     results: game.status === "completed"
       ? game.participants.map((participant, index) => ({
           name: participant.name,
@@ -98,13 +108,8 @@ function sendUpdate() {
 
 function finishRound() {
   if (!game || game.status !== "playing") return;
-  game.roundIndex += 1;
-  if (game.roundIndex >= game.participants.length) {
-    game.status = "completed";
-    game.endsAt = null;
-  } else {
-    game.endsAt = Date.now() + 30_000;
-  }
+  game.status = "scores";
+  game.endsAt = null;
   sendUpdate();
 }
 
@@ -244,8 +249,27 @@ const server = http.createServer(async (request, response) => {
     }
     game.status = "playing";
     game.roundIndex = 0;
-    game.endsAt = Date.now() + 30_000;
+    game.endsAt = Date.now() + 20_000;
     game.answers[0] = {};
+    sendUpdate();
+    json(response, 200, { game: publicGame("quizmaster") });
+    return;
+  }
+
+  if (request.method === "POST" && url.pathname === "/api/next-round") {
+    if (!game || game.status !== "scores") {
+      json(response, 409, { error: "The round results are not ready yet." });
+      return;
+    }
+    if (game.roundIndex + 1 >= game.participants.length) {
+      game.status = "completed";
+      game.endsAt = null;
+    } else {
+      game.roundIndex += 1;
+      game.status = "playing";
+      game.endsAt = Date.now() + 20_000;
+      game.answers[game.roundIndex] = {};
+    }
     sendUpdate();
     json(response, 200, { game: publicGame("quizmaster") });
     return;
