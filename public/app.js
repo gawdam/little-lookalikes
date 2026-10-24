@@ -137,8 +137,9 @@ async function requestJson(url, options = {}) {
 document.querySelector("#add-participant")?.addEventListener("click", addParticipant);
 document.querySelector("#create-form")?.addEventListener("submit", async (event) => {
   event.preventDefault();
+  const form = event.currentTarget;
   showError(createError, "");
-  const submitButton = event.currentTarget.querySelector('button[type="submit"]');
+  const submitButton = form.querySelector('button[type="submit"]');
   if (!submitButton) return;
   submitButton.disabled = true;
   submitButton.textContent = "Creating game…";
@@ -159,7 +160,7 @@ document.querySelector("#create-form")?.addEventListener("submit", async (event)
       };
     }));
     const durationSeconds = Number(
-      event.currentTarget.querySelector('input[name="round-duration"]:checked')?.value,
+      form.querySelector('input[name="round-duration"]:checked')?.value,
     );
     await requestJson("/api/game", {
       method: "POST",
