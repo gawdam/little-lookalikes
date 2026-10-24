@@ -418,7 +418,17 @@ function renderPlayer(game) {
 
 function renderAdultOptions(game, answered) {
   const options = document.querySelector("#adult-options");
-  options.innerHTML = game.participants.map((participant) =>
+  const shuffledParticipants = [...game.participants];
+  for (let index = shuffledParticipants.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(Math.random() * (index + 1));
+    [shuffledParticipants[index], shuffledParticipants[swapIndex]] =
+      [shuffledParticipants[swapIndex], shuffledParticipants[index]];
+  }
+  if (shuffledParticipants.length > 1
+    && shuffledParticipants.every((participant, index) => participant.id === game.participants[index].id)) {
+    shuffledParticipants.push(shuffledParticipants.shift());
+  }
+  options.innerHTML = shuffledParticipants.map((participant) =>
     `<button class="adult-option" type="button" data-participant="${participant.id}" ${answered ? "disabled" : ""}><img src="${participant.adultImage}" alt=""><span>${escapeHtml(participant.name)}</span></button>`,
   ).join("");
   options.querySelectorAll(".adult-option").forEach((button) => {
