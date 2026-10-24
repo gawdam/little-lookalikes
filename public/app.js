@@ -16,31 +16,38 @@ let timerInterval = null;
 let selectedRound = null;
 
 if (isPlayerPage) {
-  quizmaster.hidden = true;
-  playerPage.hidden = false;
+  if (quizmaster) quizmaster.hidden = true;
+  if (playerPage) playerPage.hidden = false;
 } else {
-  quizmaster.hidden = false;
-  playerPage.hidden = true;
+  if (quizmaster) quizmaster.hidden = false;
+  if (playerPage) playerPage.hidden = true;
 }
 
 function addParticipant() {
+  if (!participantsElement || !participantTemplate) return;
   const card = participantTemplate.content.firstElementChild.cloneNode(true);
-  card.querySelector(".remove-participant").addEventListener("click", () => {
-    if (participantsElement.children.length <= 2) {
-      showError(createError, "A game needs at least two people.");
-      return;
-    }
-    card.remove();
-    updateParticipantCount();
-    renumberParticipants();
-  });
+  const removeButton = card.querySelector(".remove-participant");
+  if (removeButton) {
+    removeButton.addEventListener("click", () => {
+      if (participantsElement.children.length <= 2) {
+        showError(createError, "A game needs at least two people.");
+        return;
+      }
+      card.remove();
+      updateParticipantCount();
+      renumberParticipants();
+    });
+  }
   for (const [inputSelector, imageSelector, promptSelector] of [
     [".baby-file", ".upload-preview", ".upload-prompt"],
     [".adult-file", ".upload-preview", ".upload-prompt"],
   ]) {
     const input = card.querySelector(inputSelector);
-    const image = input.closest(".upload-field").querySelector(imageSelector);
-    const prompt = input.closest(".upload-field").querySelector(promptSelector);
+    if (!input) continue;
+    const uploadField = input.closest(".upload-field");
+    if (!uploadField) continue;
+    const image = uploadField.querySelector(imageSelector);
+    const prompt = uploadField.querySelector(promptSelector);
     input.addEventListener("change", () => {
       const file = input.files[0];
       if (!file) return;
@@ -49,9 +56,13 @@ function addParticipant() {
         showError(createError, "Each photo must be smaller than 8 MB.");
         return;
       }
-      image.src = URL.createObjectURL(file);
-      image.hidden = false;
-      prompt.hidden = true;
+      if (image) {
+        image.src = URL.createObjectURL(file);
+        image.hidden = false;
+      }
+      if (prompt) {
+        prompt.hidden = true;
+      }
       showError(createError, "");
     });
   }
@@ -61,17 +72,23 @@ function addParticipant() {
 }
 
 function updateParticipantCount() {
+  if (!participantsElement || !participantCount) return;
   const count = participantsElement.children.length;
   participantCount.textContent = `${count} ${count === 1 ? "person" : "people"}`;
 }
 
 function renumberParticipants() {
+  if (!participantsElement) return;
   [...participantsElement.children].forEach((card, index) => {
-    card.querySelector(".participant-number").textContent = `PERSON ${String(index + 1).padStart(2, "0")}`;
+    const number = card.querySelector(".participant-number");
+    if (number) {
+      number.textContent = `PERSON ${String(index + 1).padStart(2, "0")}`;
+    }
   });
 }
 
 function showError(element, message) {
+  if (!element) return;
   element.textContent = message;
   element.hidden = !message;
 }
@@ -122,15 +139,16 @@ document.querySelector("#create-form")?.addEventListener("submit", async (event)
   event.preventDefault();
   showError(createError, "");
   const submitButton = event.currentTarget.querySelector('button[type="submit"]');
+  if (!submitButton) return;
   submitButton.disabled = true;
   submitButton.textContent = "Creating game…";
   try {
-    const cards = [...participantsElement.children];
+    const cards = [...(participantsElement?.children || [])];
     if (cards.length < 2) throw new Error("Add at least two people to create a game.");
     const participants = await Promise.all(cards.map(async (card) => {
-      const babyFile = card.querySelector(".baby-file").files[0];
-      const adultFile = card.querySelector(".adult-file").files[0];
-      const name = card.querySelector(".person-name").value.trim();
+      const babyFile = card.querySelector(".baby-file")?.files[0];
+      const adultFile = card.querySelector(".adult-file")?.files[0];
+      const name = card.querySelector(".person-name")?.value.trim();
       if (!name || !babyFile || !adultFile) {
         throw new Error("Add a name and both photos for every person.");
       }
@@ -141,7 +159,7 @@ document.querySelector("#create-form")?.addEventListener("submit", async (event)
       };
     }));
     const durationSeconds = Number(
-      event.currentTarget.querySelector('input[name="round-duration"]:checked').value,
+      event.currentTarget.querySelector('input[name="round-duration"]:checked')?.value,
     );
     await requestJson("/api/game", {
       method: "POST",
@@ -161,8 +179,10 @@ function showSection(section) {
   document.querySelectorAll(".nav-button").forEach((button) => {
     button.classList.toggle("active", button.dataset.section === section);
   });
-  document.querySelector("#create-section").hidden = section !== "create";
-  document.querySelector("#play-section").hidden = section !== "play";
+  const createSection = document.querySelector("#create-section");
+  const playSection = document.querySelector("#play-section");
+  if (createSection) createSection.hidden = section !== "create";
+  if (playSection) playSection.hidden = section !== "play";
 }
 
 document.querySelectorAll(".nav-button").forEach((button) => {
@@ -193,12 +213,17 @@ async function openGame() {
   eventSource = new EventSource(`${apiBaseUrl}/api/events`);
   eventSource.onmessage = (event) => renderQuizmaster(JSON.parse(event.data));
   eventSource.onerror = () => {
-    document.querySelector("#game-status").textContent = "Reconnecting…";
+    const status = document.querySelector("#game-status");
+    if (status) status.textContent = "Reconnecting…";
   };
   const joinInfo = await requestJson("/api/join-url");
-  document.querySelector("#qr-code").src = joinInfo.qr;
-  document.querySelector("#join-link").href = joinInfo.url;
-  document.querySelector("#join-link").textContent = joinInfo.url;
+  const qrCode = document.querySelector("#qr-code");
+  const joinLink = document.querySelector("#join-link");
+  if (qrCode) qrCode.src = joinInfo.qr;
+  if (joinLink) {
+    joinLink.href = joinInfo.url;
+    joinLink.textContent = joinInfo.url;
+  }
 }
 
 function renderQuizmaster(game) {
@@ -206,8 +231,9 @@ function renderQuizmaster(game) {
   const noGame = document.querySelector("#no-game");
   const dashboard = document.querySelector("#game-dashboard");
   const status = document.querySelector("#game-status");
-  noGame.hidden = Boolean(game);
-  dashboard.hidden = !game;
+  if (noGame) noGame.hidden = Boolean(game);
+  if (dashboard) dashboard.hidden = !game;
+  if (!status) return;
   if (!game) {
     status.textContent = "No game yet";
     status.classList.remove("live");
@@ -225,38 +251,58 @@ function renderQuizmaster(game) {
   const round = document.querySelector("#round-screen");
   const scores = document.querySelector("#scores-screen");
   const results = document.querySelector("#final-results");
-  lobby.hidden = game.status !== "lobby";
-  round.hidden = game.status !== "playing";
-  scores.hidden = game.status !== "scores";
-  results.hidden = game.status !== "completed";
+  if (lobby) lobby.hidden = game.status !== "lobby";
+  if (round) round.hidden = game.status !== "playing";
+  if (scores) scores.hidden = game.status !== "scores";
+  if (results) results.hidden = game.status !== "completed";
   if (game.status === "lobby") {
-    document.querySelector("#player-count").textContent = game.players.length;
+    const playerCount = document.querySelector("#player-count");
+    if (playerCount) playerCount.textContent = game.players.length;
     renderLobbyPlayers(game.players);
   } else if (game.status === "playing") {
     const participant = game.participants[game.roundIndex];
-    document.querySelector("#round-label").textContent = `ROUND ${game.roundNumber} OF ${game.totalRounds}`;
+    const roundLabel = document.querySelector("#round-label");
+    if (roundLabel) roundLabel.textContent = `ROUND ${game.roundNumber} OF ${game.totalRounds}`;
     const babyPhoto = document.querySelector("#baby-photo");
-    babyPhoto.src = participant.babyImage;
-    babyPhoto.hidden = false;
-    document.querySelector("#round-hint").textContent =
-      `${game.answeredCount} ${game.answeredCount === 1 ? "player has" : "players have"} made a guess`;
-    document.querySelector("#round-progress").innerHTML = game.participants.map((_, index) =>
-      `<span class="${index < game.roundIndex ? "done" : ""} ${index === game.roundIndex ? "current" : ""}"></span>`,
-    ).join("");
+    if (babyPhoto && participant) {
+      babyPhoto.src = participant.babyImage;
+      babyPhoto.hidden = false;
+    }
+    const roundHint = document.querySelector("#round-hint");
+    if (roundHint) {
+      roundHint.textContent =
+        `${game.answeredCount} ${game.answeredCount === 1 ? "player has" : "players have"} made a guess`;
+    }
+    const roundProgress = document.querySelector("#round-progress");
+    if (roundProgress) {
+      roundProgress.innerHTML = game.participants.map((_, index) =>
+        `<span class="${index < game.roundIndex ? "done" : ""} ${index === game.roundIndex ? "current" : ""}"></span>`,
+      ).join("");
+    }
     renderTimer(document.querySelector("#timer"), game.endsAt);
   } else if (game.status === "scores") {
     const reveal = game.participants[game.roundIndex];
-    document.querySelector("#scores-title").textContent = `Round ${game.roundNumber} scores`;
-    document.querySelector("#answer-baby-photo").src = game.roundResult.babyImage;
-    document.querySelector("#answer-adult-photo").src = game.roundResult.adultImage;
-    document.querySelector("#answer-name").textContent = reveal.name;
-    document.querySelector("#answer-guesses").textContent = game.roundResult.correctPlayers.length
-      ? `Guessed correctly by ${game.roundResult.correctPlayers.join(", ")}`
-      : "No correct guesses this round";
+    const scoresTitle = document.querySelector("#scores-title");
+    if (scoresTitle) scoresTitle.textContent = `Round ${game.roundNumber} scores`;
+    const answerBabyPhoto = document.querySelector("#answer-baby-photo");
+    const answerAdultPhoto = document.querySelector("#answer-adult-photo");
+    if (answerBabyPhoto) answerBabyPhoto.src = game.roundResult.babyImage;
+    if (answerAdultPhoto) answerAdultPhoto.src = game.roundResult.adultImage;
+    const answerName = document.querySelector("#answer-name");
+    if (answerName && reveal) answerName.textContent = reveal.name;
+    const answerGuesses = document.querySelector("#answer-guesses");
+    if (answerGuesses) {
+      answerGuesses.textContent = game.roundResult.correctPlayers.length
+        ? `Guessed correctly by ${game.roundResult.correctPlayers.join(", ")}`
+        : "No correct guesses this round";
+    }
     renderRoundScores(game.roundResult.scores);
-    document.querySelector("#next-round").innerHTML = game.roundIndex + 1 === game.totalRounds
-      ? 'See final results <span aria-hidden="true">→</span>'
-      : 'Next baby <span aria-hidden="true">→</span>';
+    const nextRound = document.querySelector("#next-round");
+    if (nextRound) {
+      nextRound.innerHTML = game.roundIndex + 1 === game.totalRounds
+        ? 'See final results <span aria-hidden="true">→</span>'
+        : 'Next baby <span aria-hidden="true">→</span>';
+    }
   } else {
     renderResults(game);
   }
@@ -264,6 +310,7 @@ function renderQuizmaster(game) {
 
 function renderScores(players, listId = "score-list") {
   const list = document.getElementById(listId);
+  if (!list) return;
   if (!players.length) {
     list.innerHTML = '<p class="score-empty">Players appear here when they join.</p>';
     return;
@@ -275,6 +322,7 @@ function renderScores(players, listId = "score-list") {
 
 function renderRoundScores(players) {
   const list = document.querySelector("#score-list");
+  if (!list) return;
   if (!players.length) {
     list.innerHTML = '<p class="score-empty">No players joined this game.</p>';
     return;
@@ -289,6 +337,7 @@ function renderRoundScores(players) {
 
 function renderLobbyPlayers(players) {
   const list = document.querySelector("#lobby-player-list");
+  if (!list) return;
   if (!players.length) {
     list.innerHTML = '<p class="score-empty">Players appear here when they join.</p>';
     return;
@@ -300,16 +349,18 @@ function renderLobbyPlayers(players) {
 
 function renderResults(game) {
   const results = document.querySelector("#final-results");
+  if (!results) return;
   const sorted = [...game.players].sort((a, b) => b.score - a.score);
   const winner = sorted[0];
   results.innerHTML = `<h2>And the lookalike champion is…</h2><p>${winner ? `${escapeHtml(winner.name)} takes the crown with ${winner.score} points!` : "Thanks for playing!"}</p>${sorted.map((player, index) =>
     `<div class="result-winner"><strong>${index + 1}. ${escapeHtml(player.name)}</strong><span>${player.score} points</span></div>`,
   ).join("")}<h2 style="margin-top:24px">The baby-to-grown-up reveal</h2>${game.results.map((result) =>
-    `<div class="round-results"><div>${escapeHtml(result.name)}<small>${result.correctPlayers.length ? `Correctly guessed by ${result.correctPlayers.map(escapeHtml).join(", ")}` : "No correct guesses this round"}</small></div></div>`,
+    `<div class="round-results"><div>${escapeHtml(result.name)}<small>${result.correctPlayers.length ? `Correctly guessed by ${result.correctPlayers.map(escapeHtml).join(", ")}` : "No correct guesses"}</small></div></div>`,
   ).join("")}`;
 }
 
 function renderTimer(element, endsAt) {
+  if (!element) return;
   const seconds = Math.max(0, Math.ceil((endsAt - Date.now()) / 1000));
   element.classList.toggle("urgent", seconds <= 10);
   element.innerHTML = `<span class="timer-dot"></span> 00:${String(seconds).padStart(2, "0")}`;
@@ -322,24 +373,28 @@ function escapeHtml(value) {
 }
 
 async function startPlayerPage() {
+  const playerJoin = document.querySelector("#phone-join");
+  if (!playerJoin) return;
   const playerId = localStorage.getItem(playerIdKey);
   if (!playerId) {
-    document.querySelector("#phone-join").hidden = false;
+    playerJoin.hidden = false;
   }
   const state = await requestJson(`/api/state?view=player${playerId ? `&playerId=${encodeURIComponent(playerId)}` : ""}`);
+  const phoneNoGame = document.querySelector("#phone-no-game");
   if (!state.game) {
-    document.querySelector("#phone-join").hidden = true;
-    document.querySelector("#phone-no-game").hidden = false;
+    if (phoneNoGame) phoneNoGame.hidden = false;
+    playerJoin.hidden = true;
     return;
   }
   if (playerId) {
     const registered = state.game.players.find((player) => player.id === playerId);
     if (registered) {
-      document.querySelector("#phone-join").hidden = true;
-      document.querySelector("#waiting-name").textContent = registered.name;
+      playerJoin.hidden = true;
+      const waitingName = document.querySelector("#waiting-name");
+      if (waitingName) waitingName.textContent = registered.name;
     } else {
       localStorage.removeItem(playerIdKey);
-      document.querySelector("#phone-join").hidden = false;
+      playerJoin.hidden = false;
     }
   }
   renderPlayer(state.game);
@@ -358,20 +413,26 @@ document.querySelector("#join-form")?.addEventListener("submit", async (event) =
   event.preventDefault();
   showError(joinError, "");
   const button = event.currentTarget.querySelector("button");
+  if (!button) return;
   button.disabled = true;
   try {
     const result = await requestJson("/api/join", {
       method: "POST",
       body: JSON.stringify({
-        name: document.querySelector("#player-name").value.trim(),
+        name: document.querySelector("#player-name")?.value.trim(),
         playerId: localStorage.getItem(playerIdKey),
       }),
     });
+    if (!result?.player?.id) throw new Error("The server did not return a valid player.");
     localStorage.setItem(playerIdKey, result.player.id);
-    document.querySelector("#phone-join").hidden = true;
-    document.querySelector("#phone-no-game").hidden = true;
-    document.querySelector("#waiting-name").textContent = result.player.name;
-    document.querySelector("#phone-waiting").hidden = false;
+    const phoneJoin = document.querySelector("#phone-join");
+    const phoneNoGame = document.querySelector("#phone-no-game");
+    const waitingName = document.querySelector("#waiting-name");
+    if (phoneJoin) phoneJoin.hidden = true;
+    if (phoneNoGame) phoneNoGame.hidden = true;
+    if (waitingName) waitingName.textContent = result.player.name;
+    const phoneWaiting = document.querySelector("#phone-waiting");
+    if (phoneWaiting) phoneWaiting.hidden = false;
     connectPlayerEvents();
   } catch (error) {
     showError(joinError, error.message);
@@ -382,26 +443,34 @@ document.querySelector("#join-form")?.addEventListener("submit", async (event) =
 
 function renderPlayer(game) {
   currentGame = game;
-  document.querySelector("#phone-no-game").hidden = Boolean(game);
+  const phoneNoGame = document.querySelector("#phone-no-game");
+  if (phoneNoGame) phoneNoGame.hidden = Boolean(game);
   if (!game) return;
   const playerId = localStorage.getItem(playerIdKey);
   const player = game.players.find((entry) => entry.id === playerId);
+  const phoneJoin = document.querySelector("#phone-join");
+  const phoneWaiting = document.querySelector("#phone-waiting");
+  const phonePlaying = document.querySelector("#phone-playing");
+  const phoneFinished = document.querySelector("#phone-finished");
   if (!player) {
-    document.querySelector("#phone-join").hidden = false;
-    document.querySelector("#phone-waiting").hidden = true;
-    document.querySelector("#phone-playing").hidden = true;
-    document.querySelector("#phone-finished").hidden = true;
+    if (phoneJoin) phoneJoin.hidden = false;
+    if (phoneWaiting) phoneWaiting.hidden = true;
+    if (phonePlaying) phonePlaying.hidden = true;
+    if (phoneFinished) phoneFinished.hidden = true;
     return;
   }
-  document.querySelector("#phone-join").hidden = true;
-  document.querySelector("#phone-no-game").hidden = true;
-  document.querySelector("#phone-waiting").hidden = game.status !== "lobby";
-  document.querySelector("#phone-playing").hidden = game.status !== "playing";
-  document.querySelector("#phone-round-scores").hidden = game.status !== "scores";
-  document.querySelector("#phone-finished").hidden = game.status !== "completed";
-  document.querySelector("#waiting-name").textContent = player.name;
+  if (phoneJoin) phoneJoin.hidden = true;
+  if (phoneNoGame) phoneNoGame.hidden = true;
+  if (phoneWaiting) phoneWaiting.hidden = game.status !== "lobby";
+  if (phonePlaying) phonePlaying.hidden = game.status !== "playing";
+  const phoneRoundScores = document.querySelector("#phone-round-scores");
+  if (phoneRoundScores) phoneRoundScores.hidden = game.status !== "scores";
+  if (phoneFinished) phoneFinished.hidden = game.status !== "completed";
+  const waitingName = document.querySelector("#waiting-name");
+  if (waitingName) waitingName.textContent = player.name;
   if (game.status === "playing") {
-    document.querySelector("#phone-round-label").textContent = `ROUND ${game.roundNumber} OF ${game.totalRounds}`;
+    const phoneRoundLabel = document.querySelector("#phone-round-label");
+    if (phoneRoundLabel) phoneRoundLabel.textContent = `ROUND ${game.roundNumber} OF ${game.totalRounds}`;
     renderTimer(document.querySelector("#phone-timer"), game.endsAt);
     const answered = game.playerAnswer;
     if (selectedRound !== game.roundIndex) {
@@ -411,19 +480,24 @@ function renderPlayer(game) {
     if (answered) showAnswerFeedback(answered);
   }
   if (game.status === "scores") {
-    document.querySelector("#phone-round-feedback").textContent = game.playerAnswer
-      ? game.playerAnswer.correct
-        ? "Correct! You earned 5 points this round."
-        : "Not quite this time. You earned 0 points this round."
-      : "Time ran out. You earned 0 points this round.";
+    const phoneRoundFeedback = document.querySelector("#phone-round-feedback");
+    if (phoneRoundFeedback) {
+      phoneRoundFeedback.textContent = game.playerAnswer
+        ? game.playerAnswer.correct
+          ? "Correct! You earned 5 points this round."
+          : "Not quite this time. You earned 0 points this round."
+        : "Time ran out. You earned 0 points this round.";
+    }
   }
   if (game.status === "completed") {
-    document.querySelector("#phone-final-score").textContent = `${player.score} points`;
+    const phoneFinalScore = document.querySelector("#phone-final-score");
+    if (phoneFinalScore) phoneFinalScore.textContent = `${player.score} points`;
   }
 }
 
 function renderAdultOptions(game, answered) {
   const options = document.querySelector("#adult-options");
+  if (!options) return;
   const shuffledParticipants = [...game.participants];
   for (let index = shuffledParticipants.length - 1; index > 0; index -= 1) {
     const swapIndex = Math.floor(Math.random() * (index + 1));
@@ -440,12 +514,14 @@ function renderAdultOptions(game, answered) {
   options.querySelectorAll(".adult-option").forEach((button) => {
     button.addEventListener("click", () => submitAnswer(button.dataset.participant, button));
   });
-  document.querySelector("#answer-feedback").hidden = !answered;
+  const answerFeedback = document.querySelector("#answer-feedback");
+  if (answerFeedback) answerFeedback.hidden = !answered;
 }
 
 async function submitAnswer(participantId, button) {
   const playerId = localStorage.getItem(playerIdKey);
   const options = document.querySelector("#adult-options");
+  if (!options) return;
   options.querySelectorAll("button").forEach((option) => { option.disabled = true; });
   button.classList.add("selected");
   try {
@@ -456,13 +532,17 @@ async function submitAnswer(participantId, button) {
     showAnswerFeedback(result);
   } catch (error) {
     options.querySelectorAll("button").forEach((option) => { option.disabled = false; });
-    showError(document.querySelector("#answer-feedback"), error.message);
-    document.querySelector("#answer-feedback").hidden = false;
+    const answerFeedback = document.querySelector("#answer-feedback");
+    if (answerFeedback) {
+      showError(answerFeedback, error.message);
+      answerFeedback.hidden = false;
+    }
   }
 }
 
 function showAnswerFeedback(answer) {
   const feedback = document.querySelector("#answer-feedback");
+  if (!feedback) return;
   feedback.hidden = false;
   feedback.classList.toggle("wrong", !answer.correct);
   feedback.textContent = answer.correct
@@ -473,9 +553,13 @@ function showAnswerFeedback(answer) {
 
 if (isPlayerPage) {
   startPlayerPage().catch((error) => {
-    document.querySelector("#phone-join").hidden = true;
-    document.querySelector("#phone-no-game").hidden = false;
-    document.querySelector("#phone-no-game").textContent = error.message;
+    const phoneJoin = document.querySelector("#phone-join");
+    const phoneNoGame = document.querySelector("#phone-no-game");
+    if (phoneJoin) phoneJoin.hidden = true;
+    if (phoneNoGame) {
+      phoneNoGame.hidden = false;
+      phoneNoGame.textContent = error.message;
+    }
     if (apiBaseUrl) console.error("Could not load the game:", error);
   });
 }
@@ -488,14 +572,18 @@ if (!isPlayerPage) {
       openGame()
         .then(() => showSection("play"))
         .catch((error) => {
-          document.querySelector("#game-status").textContent = "Server unavailable";
-          document.querySelector("#no-game-message").textContent = error.message;
+          const status = document.querySelector("#game-status");
+          const noGameMessage = document.querySelector("#no-game-message");
+          if (status) status.textContent = "Server unavailable";
+          if (noGameMessage) noGameMessage.textContent = error.message;
           if (apiBaseUrl) console.error("Could not connect to the game:", error);
         });
     }
   }).catch((error) => {
-    document.querySelector("#game-status").textContent = "Server unavailable";
-    document.querySelector("#no-game-message").textContent = error.message;
+    const status = document.querySelector("#game-status");
+    const noGameMessage = document.querySelector("#no-game-message");
+    if (status) status.textContent = "Server unavailable";
+    if (noGameMessage) noGameMessage.textContent = error.message;
     if (apiBaseUrl) console.error("Could not load the game:", error);
   });
 }
@@ -504,7 +592,7 @@ timerInterval = window.setInterval(() => {
   const masterTimer = document.querySelector("#timer");
   const phoneTimer = document.querySelector("#phone-timer");
   if (currentGame?.status === "playing" && masterTimer) renderTimer(masterTimer, currentGame.endsAt);
-  if (isPlayerPage && phoneTimer && !document.querySelector("#phone-playing").hidden) {
+  if (isPlayerPage && phoneTimer && !document.querySelector("#phone-playing")?.hidden) {
     if (currentGame?.status === "playing") renderTimer(phoneTimer, currentGame.endsAt);
   }
 }, 1000);
